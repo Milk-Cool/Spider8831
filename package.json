@@ -1,0 +1,26 @@
+{
+  "name": "spider8831",
+  "version": "0.1.0",
+  "description": "A simple 88x31 banner scanner",
+  "main": "index.js",
+  "bin": "cli.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Milk-Cool/Spider8831.git"
+  },
+  "keywords": [
+    "neocities",
+    "scanner",
+    "web",
+    "spider"
+  ],
+  "author": "Milk_Cool",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Milk-Cool/Spider8831/issues"
+  },
+  "homepage": "https://github.com/Milk-Cool/Spider8831#readme",
+  "devDependencies": {
+    "@types/node": "^22.15.14"
+  }
+}
