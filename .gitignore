@@ -137,3 +137,9 @@ dist
 
 # Package lock
 package-lock.json
+
+# Test data
+testd/
+
+# Test output
+testo/

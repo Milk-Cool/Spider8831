@@ -21,6 +21,11 @@
   },
   "homepage": "https://github.com/Milk-Cool/Spider8831#readme",
   "devDependencies": {
+    "@types/jsdom": "^21.1.7",
     "@types/node": "^22.15.14"
+  },
+  "dependencies": {
+    "image-size": "^2.0.2",
+    "jsdom": "^26.1.0"
   }
 }
