@@ -22,6 +22,7 @@ import { imageSize } from "image-size";
  * @typedef {object} Spider8831Image
  * @property {string} url
  * @property {Buffer} img
+ * @property {string} [link]
  */
 /**
  * @typedef {object} Spider8831Return
@@ -143,12 +144,18 @@ export default class Spider8831 {
             if(!src) continue;
             src = new URL(src, new URL(url).origin).href;
             this.visited.push(src);
+            let link = null;
+            if(img.parentElement && img.parentElement.tagName.toLowerCase() === "a" && img.parentElement.href)
+                link = new URL(img.parentElement.href, new URL(url).origin).href;
             try {
                 const img = await Spider8831.fetchImage(src);
                 const size = Spider8831.getImageSize(img);
                 if(size[0] !== this.width || size[1] !== this.height) continue;
                 cb?.({ type: "image", url: src });
-                imgs.push({ img, url: src });
+                /** @type {Spider8831Image} */
+                const res = { img, url: src };
+                if(link !== null) res.link = link;
+                imgs.push(res);
             } catch(_) {
                 cb?.({ type: "error", url: src });
             }

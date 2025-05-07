@@ -75,7 +75,7 @@ let out = [], n = 0;
                 const ext = ind === -1 ? img.url : img.url.slice(ind);
                 if(!Spider8831.imgURL(img.url)) continue;
                 writeFileSync(join(values.output, n + ext), img.img);
-                appendFileSync(join(values.output, "index.txt"), `${n}: ${img.url}\n`);
+                appendFileSync(join(values.output, "index.txt"), `${n}: ${img.url}${img.link ? " -> " + img.link : ""}\n`);
                 n++;
             }
         }
