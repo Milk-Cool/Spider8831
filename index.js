@@ -32,14 +32,14 @@ import { imageSize } from "image-size";
 export default class Spider8831 {
     static defaultFollow = /^https?:\/\/.+\.neocities\.org/;
 
-    // /**
-    //  * @param {string} url
-    //  * @returns {boolean}
-    //  */
-    // static imgURL(url) {
-    //     const urlObj = new URL(url);
-    //     return urlObj.pathname.match(/\.(png|jpe?g|gif|webp|bmp)$/);
-    // }
+    /**
+     * @param {string} url
+     * @returns {boolean}
+     */
+    static imgURL(url) {
+        const urlObj = new URL(url);
+        return urlObj.pathname.match(/\.(png|jpe?g|gif|webp|bmp)$/);
+    }
 
     /**
      * @param {Spider8831Options} options 

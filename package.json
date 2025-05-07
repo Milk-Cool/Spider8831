@@ -1,6 +1,6 @@
 {
   "name": "spider8831",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A simple 88x31 banner scanner",
   "main": "index.js",
   "bin": "cli.js",
