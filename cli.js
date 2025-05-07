@@ -71,9 +71,10 @@ let out = [], n = 0;
         for(const img of res.imgs) {
             out.push(img.url);
             if(values.output) {
-                const ind = img.url.lastIndexOf(".");
-                const ext = ind === -1 ? img.url : img.url.slice(ind);
                 if(!Spider8831.imgURL(img.url)) continue;
+                const path = new URL(img.url).pathname;
+                const ind = path.lastIndexOf(".");
+                const ext = ind === -1 ? path : path.slice(ind);
                 writeFileSync(join(values.output, n + ext), img.img);
                 appendFileSync(join(values.output, "index.txt"), `${n}: ${img.url}${img.link ? " -> " + img.link : ""}\n`);
                 n++;
