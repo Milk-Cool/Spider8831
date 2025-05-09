@@ -7,10 +7,11 @@ import { imageSize } from "image-size";
  * @property {number} [height]
  * @property {RegExp | (url: string) => boolean | false} [follow]
  * @property {number} [depth]
+ * @property {number} [timeout]
  */
 /**
  * @typedef {object} Spider8831CallbackOpts
- * @property {"image" | "link" | "error"} type
+ * @property {"image" | "link" | "error" | "timeout"} type
  * @property {string} url
  */
 /**
@@ -29,6 +30,8 @@ import { imageSize } from "image-size";
  * @property {Spider8831Link[]} next
  * @property {Spider8831Image[]} imgs
  */
+
+const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 export default class Spider8831 {
     static defaultFollow = /^https?:\/\/.+\.neocities\.org/;
@@ -50,6 +53,7 @@ export default class Spider8831 {
         this.height = options.height ?? 31;
         this.follow = options.follow ?? (() => Spider8831.defaultFollow);
         this.depth = options.depth ?? 5;
+        this.timeout = options.timeout ?? 30000;
 
         /** @type {string[]} */
         this.visited = [];
@@ -114,52 +118,65 @@ export default class Spider8831 {
         if(depth >= this.depth) return { next: [], imgs: [] };
         url = Spider8831.getURL(url);
         this.visited.push(url);
-        /** @type {JSDOM} */
-        let dom;
-        try {
-            dom = await Spider8831.fetchJSDOM(url);
-        } catch(_) {
-            cb?.({ type: "error", url: url });
-            return { next: [], imgs: [] };
-        }
-        const { document } = dom.window;
-        const links = Array.from(document.querySelectorAll("a"));
-        const images = Array.from(document.querySelectorAll("img"));
-        
+        let timedOut = false;
+                
         /** @type {Spider8831Link[]} */
         const next = [];
         /** @type {Spider8831Image[]} */
         const imgs = [];
 
-        for(const link of links) {
-            let href = link.href;
-            if(!href) continue;
-            href = new URL(href, new URL(url).origin).href;
-            if(!this.checkURL(href)) continue;
-            cb?.({ type: "link", url: href });
-            next.push({ depth: depth + 1, url: href });
-        }
-        for(const img of images) {
-            let src = img.src;
-            if(!src) continue;
-            src = new URL(src, new URL(url).origin).href;
-            this.visited.push(src);
-            let link = null;
-            if(img.parentElement && img.parentElement.tagName.toLowerCase() === "a" && img.parentElement.href)
-                link = new URL(img.parentElement.href, new URL(url).origin).href;
-            try {
-                const img = await Spider8831.fetchImage(src);
-                const size = Spider8831.getImageSize(img);
-                if(size[0] !== this.width || size[1] !== this.height) continue;
-                cb?.({ type: "image", url: src });
-                /** @type {Spider8831Image} */
-                const res = { img, url: src };
-                if(link !== null) res.link = link;
-                imgs.push(res);
-            } catch(_) {
-                cb?.({ type: "error", url: src });
-            }
-        }
+        await Promise.race([
+            (async () => {
+                await wait(this.timeout);
+                timedOut = true;
+                cb?.({ type: "timeout", url });
+            })(),
+            (async () => {
+                /** @type {JSDOM} */
+                let dom;
+                try {
+                    dom = await Spider8831.fetchJSDOM(url);
+                } catch(_) {
+                    cb?.({ type: "error", url: url });
+                    return { next: [], imgs: [] };
+                }
+                if(timedOut) return;
+                const { document } = dom.window;
+                const links = Array.from(document.querySelectorAll("a"));
+                const images = Array.from(document.querySelectorAll("img"));
+
+                for(const link of links) {
+                    let href = link.href;
+                    if(!href) continue;
+                    href = new URL(href, new URL(url).origin).href;
+                    if(!this.checkURL(href)) continue;
+                    cb?.({ type: "link", url: href });
+                    next.push({ depth: depth + 1, url: href });
+                }
+                for(const img of images) {
+                    let src = img.src;
+                    if(!src) continue;
+                    src = new URL(src, new URL(url).origin).href;
+                    this.visited.push(src);
+                    let link = null;
+                    if(img.parentElement && img.parentElement.tagName.toLowerCase() === "a" && img.parentElement.href)
+                        link = new URL(img.parentElement.href, new URL(url).origin).href;
+                    try {
+                        const img = await Spider8831.fetchImage(src);
+                        if(timedOut) return;
+                        const size = Spider8831.getImageSize(img);
+                        if(size[0] !== this.width || size[1] !== this.height) continue;
+                        cb?.({ type: "image", url: src });
+                        /** @type {Spider8831Image} */
+                        const res = { img, url: src };
+                        if(link !== null) res.link = link;
+                        imgs.push(res);
+                    } catch(_) {
+                        cb?.({ type: "error", url: src });
+                    }
+                }
+            })()
+        ]);
         return { imgs, next };
     }
 }

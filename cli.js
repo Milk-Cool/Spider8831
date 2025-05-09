@@ -51,7 +51,8 @@ const cb = (data) => {
     console.log({
         image: "\x1b[32m\x1b[1mIMAGE\x1b[0m",
         link: "\x1b[34m\x1b[1mLINK\x1b[0m",
-        error: "\x1b[31m\x1b[1mERROR\x1b[0m"
+        error: "\x1b[31m\x1b[1mERROR\x1b[0m",
+        timeout: "\x1b[31m\x1b[1mTIMEOUT\x1b[0m"
     }[data.type] + ": " + data.url);
 };
 
